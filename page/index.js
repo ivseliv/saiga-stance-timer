@@ -24,9 +24,9 @@ const settingsFile = { path: 'timer-settings.json', options: { encoding: 'utf8' 
 
 function loadSettings() {
   try {
-    return normalizeSettings(JSON.parse(readFileSync(settingsFile)))
+    return JSON.parse(readFileSync(settingsFile)) ?? {}
   } catch (error) {
-    return normalizeSettings()
+    return {}
   }
 }
 
@@ -51,8 +51,10 @@ function button(text, x, y, w, h, click, options = {}) {
 
 Page({
   build() {
-    this.settings = loadSettings()
-    this.copy = stringsForLanguage(getLanguage())
+    const saved = loadSettings()
+    this.settings = normalizeSettings(saved)
+    this.language = saved.language === 'ru' || saved.language === 'en' ? saved.language : undefined
+    this.copy = stringsForLanguage(this.language ?? getLanguage())
     this.motor = new Vibrator()
     this.round = loadRound()
     this.finished = false
@@ -62,7 +64,10 @@ Page({
 
     setStatusBarVisible(false)
     rect(0, 0, 390, 450, colors.background)
-    label(this.copy.title, 44, 26, 302, 30, 20, colors.accent)
+    this.titleLabel = label('', 44, 26, 248, 30, 20, colors.accent)
+    this.languageButton = button('', 298, 22, 56, 38, () => this.changeLanguage(), {
+      radius: 14, text_size: 18,
+    })
     this.clock = label('', 23, 62, 344, 113, 96)
     this.caption = label('', 36, 172, 318, 31, 20, colors.muted)
     this.track = rect(36, 230, 318, 8, colors.panel, 4)
@@ -78,8 +83,8 @@ Page({
     this.startButton = button(this.copy.start, 32, 314, 326, 68, () => this.startRound(), {
       normal_color: colors.accent, press_color: colors.accentPressed, color: colors.background, text_size: 28,
     })
-    this.stopButton = button(this.copy.stop, 36, 320, 318, 59, () => this.stopRound())
-    this.testButton = button(this.copy.test, 65, 383, 260, 47, () => this.testCues(), {
+    this.stopButton = button('', 36, 320, 318, 59, () => this.stopRound())
+    this.testButton = button('', 65, 383, 260, 47, () => this.testCues(), {
       normal_color: colors.background, color: colors.muted, text_size: 20,
     })
     this.render()
@@ -88,7 +93,8 @@ Page({
 
   saveSettings() {
     try {
-      writeFileSync({ ...settingsFile, data: JSON.stringify(this.settings) })
+      const data = JSON.stringify({ ...this.settings, language: this.language })
+      writeFileSync({ ...settingsFile, data })
     } catch (error) {
       console.log('Could not save timer settings')
     }
@@ -110,6 +116,14 @@ Page({
     this.saveSettings()
   },
 
+  changeLanguage() {
+    if (this.round) return
+    this.cancelTest()
+    this.language = this.copy.switchLanguage
+    this.copy = stringsForLanguage(this.language)
+    this.saveSettings()
+  },
+
   render() {
     const running = this.round !== null
     const now = Date.now()
@@ -117,13 +131,17 @@ Page({
     const remaining = running ? roundAt(this.round, now - this.round.startedAt).remaining
       : this.finished ? 0 : this.settings.minutes * 60
     const mode = this.copy.modes[this.settings.mode]
+    this.titleLabel.setProperty(prop.TEXT, this.copy.title)
+    this.languageButton.setProperty(prop.TEXT, this.copy.switchLanguage.toUpperCase())
     this.clock.setProperty(prop.TEXT, left ? String(left) : formatTime(remaining))
     this.caption.setProperty(prop.TEXT, left ? this.copy.getReady : running ? this.copy.remaining
       : this.finished ? this.copy.finished : this.copy.duration)
     this.mode.setProperty(prop.TEXT, mode.label)
     this.hint.setProperty(prop.TEXT, running ? '' : mode.hint)
     this.startButton.setProperty(prop.TEXT, this.finished ? this.copy.repeat : this.copy.start)
-    for (const control of [this.minus, this.mode, this.plus, this.startButton, this.testButton]) {
+    this.stopButton.setProperty(prop.TEXT, this.copy.stop)
+    this.testButton.setProperty(prop.TEXT, this.copy.test)
+    for (const control of [this.languageButton, this.minus, this.mode, this.plus, this.startButton, this.testButton]) {
       control.setProperty(prop.VISIBLE, !running)
     }
     for (const control of [this.track, this.progress, this.stopButton]) {

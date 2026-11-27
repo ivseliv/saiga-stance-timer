@@ -4,7 +4,7 @@
     "appId": 7349618,
     "appName": "SaigaStanceTimer",
     "appType": "app",
-    "version": { "code": 8, "name": "0.6.0" },
+    "version": { "code": 9, "name": "0.6.1" },
     "icon": "stance-icon.png",
     "vender": "Vibration Timer",
     "description": "Countdown timer with interval vibration cues"
