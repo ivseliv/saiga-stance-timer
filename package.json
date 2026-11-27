@@ -1,0 +1,15 @@
+{
+  "name": "bip6-vibration-timer",
+  "version": "0.6.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "build": "zeus build -t \"Amazfit Bip 6\"",
+    "dev": "zeus dev -t \"Amazfit Bip 6\"",
+    "preview": "zeus preview -t \"Amazfit Bip 6\""
+  },
+  "devDependencies": {
+    "@zeppos/zeus-cli": "1.10.3"
+  }
+}

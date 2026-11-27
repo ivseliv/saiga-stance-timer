@@ -1,0 +1,39 @@
+{
+  "configVersion": "v3",
+  "app": {
+    "appId": 7349618,
+    "appName": "SaigaStanceTimer",
+    "appType": "app",
+    "version": { "code": 8, "name": "0.6.0" },
+    "icon": "stance-icon.png",
+    "vender": "Vibration Timer",
+    "description": "Countdown timer with interval vibration cues"
+  },
+  "runtime": {
+    "apiVersion": {
+      "minVersion": "4.0.0",
+      "target": "4.0.0",
+      "compatible": "4.0.0"
+    }
+  },
+  "permissions": ["device:os.alarm"],
+  "targets": {
+    "bip-6": {
+      "module": {
+        "page": { "pages": ["page/index"] },
+        "app-service": { "services": ["app-service/round"] }
+      },
+      "platforms": [
+        { "name": "bip6", "deviceSource": 9765120 },
+        { "name": "bip6", "deviceSource": 9765121 },
+        { "name": "bip6", "deviceSource": 10158337 }
+      ],
+      "designWidth": 390
+    }
+  },
+  "i18n": {
+    "en-US": { "appName": "Saiga Stance Timer" },
+    "ru-RU": { "appName": "Таймер стойки" }
+  },
+  "defaultLanguage": "en-US"
+}
